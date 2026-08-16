@@ -1,0 +1,739 @@
+:root {
+  /* Cores - paleta de "livro-caixa": neutro terroso + verde de confirmação/lucro + vermelho de alerta/prejuízo */
+  --cor-fundo: #efece2;
+  --cor-superficie: #ffffff;
+  --cor-tinta: #23291f;
+  --cor-tinta-suave: #5c6355;
+  --cor-primaria: #2f5233;
+  --cor-primaria-escura: #203b25;
+  --cor-lucro: #2f5233;
+  --cor-prejuizo: #a13d2c;
+  --cor-borda: #d8d3c2;
+
+  --fonte-titulo: "Roboto Slab", serif;
+  --fonte-corpo: "Inter", system-ui, sans-serif;
+  --fonte-numero: "IBM Plex Mono", monospace;
+
+  --raio: 14px;
+  --sombra: 0 2px 10px rgba(35, 41, 31, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--cor-fundo);
+  color: var(--cor-tinta);
+  font-family: var(--fonte-corpo);
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select {
+  font-family: inherit;
+}
+
+/* Toque grande e confortável em qualquer elemento clicável - essencial pra celular */
+button {
+  min-height: 48px;
+  cursor: pointer;
+}
+
+input, select {
+  min-height: 48px;
+}
+
+::selection {
+  background: var(--cor-primaria);
+  color: white;
+}
+
+/* Foco visível para navegação por teclado */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--cor-primaria);
+  outline-offset: 2px;
+}
+
+/* Respeita preferência de menos movimento */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- Layout geral ---------- */
+
+.tela-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login-cartao {
+  width: 100%;
+  max-width: 380px;
+  background: var(--cor-superficie);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  padding: 32px 24px;
+}
+
+.login-titulo {
+  font-family: var(--fonte-titulo);
+  font-size: 28px;
+  margin: 0 0 4px;
+  color: var(--cor-primaria-escura);
+}
+
+.login-subtitulo {
+  margin: 0 0 24px;
+  color: var(--cor-tinta-suave);
+  font-size: 15px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cor-tinta);
+}
+
+.campo input,
+.campo select {
+  font-size: 16px; /* evita zoom automático no iOS */
+  font-weight: 400;
+  padding: 12px 14px;
+  border: 1.5px solid var(--cor-borda);
+  border-radius: 10px;
+  background: white;
+  color: var(--cor-tinta);
+}
+
+.campo input:focus,
+.campo select:focus {
+  border-color: var(--cor-primaria);
+}
+
+.botao-primario {
+  background: var(--cor-primaria);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 14px;
+  transition: background 0.15s ease;
+}
+
+.botao-primario:hover:not(:disabled) {
+  background: var(--cor-primaria-escura);
+}
+
+.botao-primario:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.botao-secundario {
+  background: white;
+  color: var(--cor-primaria-escura);
+  border: 1.5px solid var(--cor-primaria);
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px;
+}
+
+.botao-largura-total {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.botao-texto {
+  display: block;
+  margin: 16px auto 0;
+  background: none;
+  border: none;
+  color: var(--cor-primaria);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+  min-height: auto;
+}
+
+.mensagem-erro {
+  color: var(--cor-prejuizo);
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.mensagem-erro-central {
+  text-align: center;
+  padding: 16px;
+}
+
+/* ---------- Tela principal ---------- */
+
+.tela-principal {
+  min-height: 100vh;
+  padding-bottom: 100px; /* espaço pro botão flutuante não cobrir conteúdo */
+}
+
+.topo-app {
+  background: var(--cor-primaria-escura);
+  color: white;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topo-titulo {
+  font-family: var(--fonte-titulo);
+  font-size: 20px;
+  margin: 0;
+}
+
+.botao-sair {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 40px;
+}
+
+.conteudo {
+  padding: 20px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.texto-carregando {
+  text-align: center;
+  color: var(--cor-tinta-suave);
+  padding: 40px 0;
+}
+
+.botao-flutuante {
+  position: fixed;
+  bottom: 84px;
+  left: 20px;
+  right: 20px;
+  max-width: 440px;
+  margin: 0 auto;
+  background: var(--cor-primaria);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(47, 82, 51, 0.35);
+  z-index: 12;
+}
+
+.botao-flutuante:hover {
+  background: var(--cor-primaria-escura);
+}
+
+/* ---------- Recibo (elemento de assinatura visual) ---------- */
+
+.recibo {
+  background: var(--cor-superficie);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  padding: 24px 20px;
+  position: relative;
+}
+
+.recibo-topo {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.recibo-selo {
+  font-family: var(--fonte-numero);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--cor-tinta-suave);
+  border: 1.5px dashed var(--cor-borda);
+  border-radius: 999px;
+  padding: 6px 16px;
+}
+
+.recibo-vazio {
+  text-align: center;
+  color: var(--cor-tinta-suave);
+  font-size: 14px;
+  padding: 12px 0;
+}
+
+.recibo-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.recibo-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: baseline;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--cor-borda);
+  font-size: 14px;
+}
+
+.recibo-item-nome {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recibo-item-estoque {
+  font-family: var(--fonte-numero);
+  color: var(--cor-tinta-suave);
+  font-size: 13px;
+}
+
+.recibo-item-valor {
+  font-family: var(--fonte-numero);
+  font-weight: 600;
+  text-align: right;
+}
+
+.valor-lucro {
+  color: var(--cor-lucro);
+}
+
+.valor-prejuizo {
+  color: var(--cor-prejuizo);
+}
+
+.recibo-divisor {
+  border-top: 2px dashed var(--cor-borda);
+  margin: 16px 0;
+}
+
+.recibo-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--fonte-titulo);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* ---------- Modais (formulários) ---------- */
+
+.modal-fundo {
+  position: fixed;
+  inset: 0;
+  background: rgba(35, 41, 31, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 20;
+  padding: 0;
+}
+
+.modal-cartao {
+  background: var(--cor-superficie);
+  border-radius: 20px 20px 0 0;
+  padding: 28px 24px 32px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 88vh;
+  overflow-y: auto;
+}
+
+.modal-titulo {
+  font-family: var(--fonte-titulo);
+  font-size: 20px;
+  margin: 0 0 20px;
+  color: var(--cor-primaria-escura);
+}
+
+.modal-acoes {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.modal-acoes .botao-secundario,
+.modal-acoes .botao-primario {
+  flex: 1;
+}
+
+.alternador {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  background: var(--cor-fundo);
+  padding: 4px;
+  border-radius: 10px;
+}
+
+.alternador-opcao {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cor-tinta-suave);
+}
+
+.alternador-opcao.ativo {
+  background: var(--cor-superficie);
+  color: var(--cor-primaria-escura);
+  box-shadow: 0 1px 4px rgba(35, 41, 31, 0.12);
+}
+
+/* Telas maiores: o modal vira um cartão centralizado, não uma folha subindo */
+@media (min-width: 560px) {
+  .modal-fundo {
+    align-items: center;
+  }
+  .modal-cartao {
+    border-radius: var(--raio);
+    max-height: 85vh;
+  }
+}
+
+/* ---------- Barra de abas ---------- */
+
+.barra-abas {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: var(--cor-superficie);
+  border-top: 1px solid var(--cor-borda);
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+  z-index: 15;
+}
+
+.barra-abas-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  color: var(--cor-tinta-suave);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 8px 2px;
+  border-radius: 10px;
+}
+
+.barra-abas-item.ativo {
+  color: var(--cor-primaria-escura);
+  background: var(--cor-fundo);
+}
+
+.barra-abas-icone {
+  font-size: 19px;
+  line-height: 1;
+}
+
+/* ---------- Cartão clicável (usado em Pendentes por cliente) ---------- */
+
+.cartao-item-clicavel {
+  width: 100%;
+  text-align: left;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.cartao-item-clicavel:active {
+  background: var(--cor-fundo);
+}
+
+/* ---------- Tabela financeira por produto ---------- */
+
+.tabela-financeira {
+  width: 100%;
+  margin-top: 6px;
+}
+
+.tabela-financeira-linha {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--cor-tinta-suave);
+  padding: 5px 0;
+  border-bottom: 1px dashed var(--cor-borda);
+}
+
+.tabela-financeira-linha:last-child {
+  border-bottom: none;
+}
+
+.tabela-financeira-destaque {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--cor-tinta);
+  padding-top: 8px;
+}
+
+.faixa-total-modal {
+  margin-bottom: 16px;
+}
+
+/* Ajustes gerais de tela para acomodar a barra de abas fixa */
+
+.tela-principal {
+  padding-bottom: 0;
+}
+
+main {
+  padding-bottom: 76px; /* espaço pra barra de abas não cobrir conteúdo */
+}
+
+.conteudo-com-flutuante {
+  padding-bottom: 90px; /* espaço extra quando também tem o botão flutuante */
+}
+
+/* ---------- Seções e listas genéricas (Clientes, Fiado) ---------- */
+
+.secao-titulo {
+  font-family: var(--fonte-titulo);
+  font-size: 18px;
+  color: var(--cor-primaria-escura);
+  margin: 4px 0 16px;
+}
+
+.texto-vazio {
+  text-align: center;
+  color: var(--cor-tinta-suave);
+  font-size: 14px;
+  padding: 24px 16px;
+  background: var(--cor-superficie);
+  border-radius: var(--raio);
+}
+
+.lista-cartoes {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cartao-item {
+  background: var(--cor-superficie);
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: var(--sombra);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cartao-item-coluna {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.cartao-item-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cartao-item-nome {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.cartao-item-detalhe {
+  font-size: 13px;
+  color: var(--cor-tinta-suave);
+}
+
+.etiqueta {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.etiqueta-ok {
+  background: rgba(47, 82, 51, 0.12);
+  color: var(--cor-lucro);
+}
+
+.etiqueta-alerta {
+  background: rgba(161, 61, 44, 0.12);
+  color: var(--cor-prejuizo);
+}
+
+.faixa-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  background: var(--cor-superficie);
+  border-radius: var(--raio);
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  font-family: var(--fonte-titulo);
+  font-size: 16px;
+  font-weight: 700;
+  box-shadow: var(--sombra);
+}
+
+.botao-pequeno {
+  padding: 10px;
+  font-size: 14px;
+  min-height: 40px;
+}
+
+/* ---------- Checkbox de fiado ---------- */
+
+.campo-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cor-tinta);
+}
+
+.campo-checkbox input {
+  width: 20px;
+  height: 20px;
+  min-height: auto;
+  accent-color: var(--cor-primaria);
+}
+
+.campo-dica {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--cor-tinta-suave);
+}
+
+/* ---------- Recibo: linhas secundárias e subtítulo ---------- */
+
+.recibo-subtitulo {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cor-tinta-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 8px;
+}
+
+.recibo-linha-secundaria {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--cor-tinta-suave);
+  padding: 4px 0;
+}
+
+.recibo-linha-valor {
+  font-family: var(--fonte-numero);
+  font-weight: 600;
+}
+
+.botoes-secundarios {
+  margin-top: 16px;
+}
+
+/* ---------- Ações de excluir e destaque de estoque ---------- */
+
+.botao-perigo {
+  background: white;
+  color: var(--cor-prejuizo);
+  border: 1.5px solid var(--cor-prejuizo);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  min-height: 40px;
+  white-space: nowrap;
+}
+
+.botao-perigo:disabled {
+  opacity: 0.5;
+}
+
+.cartao-item-estoque-destaque {
+  font-family: var(--fonte-numero);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--cor-primaria-escura);
+  margin-top: 4px;
+}
+
+.cartao-item-estoque-rotulo {
+  font-family: var(--fonte-corpo);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--cor-tinta-suave);
+  margin-left: 6px;
+}
+
+.cartao-item-acoes {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.secao-titulo-espacada {
+  margin-top: 28px;
+}
+
+.secao-descricao {
+  font-size: 13px;
+  color: var(--cor-tinta-suave);
+  margin: -10px 0 16px;
+}
+
+.campo-dica-alerta {
+  color: var(--cor-prejuizo);
+  display: block;
+  padding: 10px 12px;
+  background: rgba(161, 61, 44, 0.08);
+  border-radius: 8px;
+}
+
+.mensagem-erro-acao {
+  background: rgba(161, 61, 44, 0.08);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
