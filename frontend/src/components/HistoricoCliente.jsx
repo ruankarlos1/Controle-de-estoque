@@ -42,7 +42,7 @@ export default function HistoricoCliente({ cliente, aoFechar }) {
                     <span className="cartao-item-detalhe">
                       {c.quantidade} un. •{" "}
                       {new Date(c.data).toLocaleDateString("pt-BR")}
-                      {c.fiado && (c.pago ? " • pendente paga" : " • ainda pendente")}
+                      {c.pendente && (c.pago ? " • pendente paga" : " • ainda pendente")}
                     </span>
                   </li>
                 ))}

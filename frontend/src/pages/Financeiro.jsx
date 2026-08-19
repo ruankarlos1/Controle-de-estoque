@@ -6,23 +6,51 @@ function formatarMoeda(valor) {
   return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+// Nome do mês atual, tipo "agosto de 2026" - só pra dar contexto na tela.
+const nomeMesAtual = new Date().toLocaleDateString("pt-BR", {
+  month: "long",
+  year: "numeric",
+});
+
 export default function Financeiro() {
   const [resumo, setResumo] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+  // Por padrão mostra só o mês atual. O histórico completo continua
+  // salvo no banco normalmente - isso aqui só decide o que aparece na
+  // tela até o usuário clicar pra ver tudo.
+  const [verHistoricoCompleto, setVerHistoricoCompleto] = useState(false);
 
-  useEffect(() => {
+  function carregar(mostrarTudo) {
+    setCarregando(true);
+    setErro("");
     api
-      .resumoGeral()
+      .resumoGeral(!mostrarTudo)
       .then(setResumo)
       .catch((err) => setErro(err.message))
       .finally(() => setCarregando(false));
-  }, []);
+  }
+
+  useEffect(() => {
+    carregar(verHistoricoCompleto);
+  }, [verHistoricoCompleto]);
 
   return (
     <div className="conteudo">
       <h2 className="secao-titulo">Financeiro</h2>
-      <p className="secao-descricao">Quanto você gastou, vendeu e lucrou.</p>
+      <p className="secao-descricao">
+        {verHistoricoCompleto
+          ? "Todo o histórico de compras e vendas."
+          : `Mostrando só ${nomeMesAtual}. O histórico completo continua salvo.`}
+      </p>
+
+      <button
+        type="button"
+        className="botao-secundario botao-largura-total"
+        onClick={() => setVerHistoricoCompleto((atual) => !atual)}
+      >
+        {verHistoricoCompleto ? "Ver só este mês" : "Ver histórico completo"}
+      </button>
 
       {carregando && <p className="texto-carregando">Carregando...</p>}
       {erro && <p className="mensagem-erro mensagem-erro-central">{erro}</p>}

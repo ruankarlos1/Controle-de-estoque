@@ -17,7 +17,7 @@ export default function Clientes() {
     try {
       const [listaClientes, resumoDevedores] = await Promise.all([
         api.listarClientes(),
-        api.fiadoPorCliente(),
+        api.pendentesPorCliente(),
       ]);
       setClientes(listaClientes);
       setDevedores(resumoDevedores);

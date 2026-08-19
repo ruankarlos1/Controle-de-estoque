@@ -523,7 +523,7 @@ main {
   padding-bottom: 90px; /* espaço extra quando também tem o botão flutuante */
 }
 
-/* ---------- Seções e listas genéricas (Clientes, Fiado) ---------- */
+/* ---------- Seções e listas genéricas (Clientes, Pendentes) ---------- */
 
 .secao-titulo {
   font-family: var(--fonte-titulo);
@@ -621,7 +621,7 @@ main {
   min-height: 40px;
 }
 
-/* ---------- Checkbox de fiado ---------- */
+/* ---------- Checkbox de venda pendente ---------- */
 
 .campo-checkbox {
   display: flex;

@@ -80,15 +80,15 @@ class MovimentacaoBase(BaseModel):
     valor_unitario: float
     observacao: Optional[str] = None
     cliente_id: Optional[int] = None
-    fiado: bool = False
+    pendente: bool = False
 
 
 class MovimentacaoCreate(MovimentacaoBase):
     @validator("cliente_id", always=True)
     def cliente_obrigatorio_em_vendas(cls, valor, values):
-        # Toda venda (saida) precisa de um cliente vinculado. Compras (entrada)
-        # não têm cliente, então essa regra só se aplica quando tipo == saida.
-        # always=True garante que isso roda mesmo se cliente_id não for enviado.
+        # Venda (saida) sem cliente não faz sentido pra gente, então exige.
+        # Compra (entrada) não tem cliente, daí a regra só vale pra saida.
+        # always=True aqui é pra rodar mesmo se cliente_id nem for enviado.
         if values.get("tipo") == TipoMovimentacao.SAIDA and valor is None:
             raise ValueError("Escolha um cliente para registrar a venda.")
         return valor
@@ -103,9 +103,9 @@ class Movimentacao(MovimentacaoBase):
         orm_mode = True
 
 
-# ---------- Fiado ----------
+# ---------- Pendentes ----------
 
-class FiadoPendente(BaseModel):
+class Pendencia(BaseModel):
     movimentacao_id: int
     cliente_id: int
     cliente_nome: str
@@ -126,7 +126,7 @@ class CompraCliente(BaseModel):
     quantidade: float
     valor_unitario: float
     valor_total: float
-    fiado: bool
+    pendente: bool
     pago: bool
     data: datetime
 
@@ -149,4 +149,4 @@ class ResumoGeral(BaseModel):
     total_investido: float
     total_vendido: float
     lucro_total: float
-    total_a_receber: float  # soma de todos os fiados pendentes
+    total_a_receber: float  # soma de tudo que ainda tá pendente de receber

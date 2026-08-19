@@ -22,6 +22,11 @@ def resumo_produto(
 
 @router.get("/geral", response_model=schemas.ResumoGeral)
 def resumo_geral(
-    db: Session = Depends(get_db), usuario: schemas.Usuario = Depends(obter_usuario_atual)
+    apenas_mes_atual: bool = False,
+    db: Session = Depends(get_db),
+    usuario: schemas.Usuario = Depends(obter_usuario_atual),
 ):
-    return crud.calcular_resumo_geral(db, usuario.id)
+    # apenas_mes_atual=true é o que alimenta o botão "ver só este mês" no
+    # front. O histórico continua intacto no banco, isso só filtra a
+    # resposta - nada é apagado nem sobrescrito aqui.
+    return crud.calcular_resumo_geral(db, usuario.id, apenas_mes_atual)

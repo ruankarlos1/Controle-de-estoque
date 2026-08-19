@@ -61,11 +61,13 @@ class Movimentacao(Base):
     data = Column(DateTime, default=datetime.utcnow)
     observacao = Column(String, nullable=True)
 
-    # Campos de fiado - só fazem sentido em vendas (tipo=saida).
     # cliente_id é opcional: uma venda pode ser avulsa, sem cliente identificado.
+    # pendente/pago só fazem sentido em vendas (tipo=saida): pendente=True
+    # quer dizer que o cliente vai pagar depois, e pago controla se essa
+    # dívida já foi quitada.
     cliente_id = Column(Integer, ForeignKey("clientes.id"), nullable=True)
-    fiado = Column(Boolean, default=False)  # True = "a prazo", False = "à vista"
-    pago = Column(Boolean, default=True)  # só relevante quando fiado=True
+    pendente = Column(Boolean, default=False)
+    pago = Column(Boolean, default=True)
 
     produto = relationship("Produto", back_populates="movimentacoes")
     cliente = relationship("Cliente", back_populates="movimentacoes")

@@ -102,8 +102,9 @@ export const api = {
     });
   },
 
-  resumoGeral() {
-    return requisitar("/relatorios/geral");
+  resumoGeral(apenasMesAtual = false) {
+    const query = apenasMesAtual ? "?apenas_mes_atual=true" : "";
+    return requisitar(`/relatorios/geral${query}`);
   },
 
   listarClientes() {
@@ -125,15 +126,15 @@ export const api = {
     return requisitar(`/clientes/${id}/compras`);
   },
 
-  fiadosPendentes() {
-    return requisitar("/fiado/pendentes");
+  listarPendentes() {
+    return requisitar("/pendentes/");
   },
 
-  fiadoPorCliente() {
-    return requisitar("/fiado/por-cliente");
+  pendentesPorCliente() {
+    return requisitar("/pendentes/por-cliente");
   },
 
-  marcarFiadoPago(movimentacaoId) {
-    return requisitar(`/fiado/${movimentacaoId}/pagar`, { method: "POST" });
+  marcarPendenteComoPago(movimentacaoId) {
+    return requisitar(`/pendentes/${movimentacaoId}/pagar`, { method: "POST" });
   },
 };

@@ -12,7 +12,7 @@ export default function Pendentes() {
   async function carregar() {
     setErro("");
     try {
-      const lista = await api.fiadosPendentes();
+      const lista = await api.listarPendentes();
       setPendentes(lista);
     } catch (err) {
       setErro(err.message);
@@ -28,7 +28,7 @@ export default function Pendentes() {
   async function marcarPago(id) {
     setProcessandoId(id);
     try {
-      await api.marcarFiadoPago(id);
+      await api.marcarPendenteComoPago(id);
       await carregar();
     } catch (err) {
       setErro(err.message);

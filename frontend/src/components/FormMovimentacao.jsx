@@ -11,7 +11,7 @@ export default function FormMovimentacao({ produtos, resumoProdutos, clientes, a
   const [tipo, setTipo] = useState("entrada");
   const [quantidade, setQuantidade] = useState("");
   const [valor, setValor] = useState("");
-  const [fiado, setFiado] = useState(false);
+  const [pendente, setPendente] = useState(false);
   const [clienteId, setClienteId] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState("");
@@ -41,7 +41,7 @@ export default function FormMovimentacao({ produtos, resumoProdutos, clientes, a
         tipo,
         quantidade: quantidadeNumero,
         valor_unitario: Number(valor),
-        fiado: tipo === "saida" ? fiado : false,
+        pendente: tipo === "saida" ? pendente : false,
         cliente_id: tipo === "saida" ? Number(clienteId) : null,
       });
       aoSalvar();
@@ -151,8 +151,8 @@ export default function FormMovimentacao({ produtos, resumoProdutos, clientes, a
               <label className="campo-checkbox">
                 <input
                   type="checkbox"
-                  checked={fiado}
-                  onChange={(e) => setFiado(e.target.checked)}
+                  checked={pendente}
+                  onChange={(e) => setPendente(e.target.checked)}
                 />
                 <span>É venda pendente (cliente vai pagar depois)</span>
               </label>

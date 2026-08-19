@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -123,7 +125,7 @@ def criar_movimentacao(
     db: Session, mov: schemas.MovimentacaoCreate, usuario_id: int
 ) -> models.Movimentacao:
     dados = mov.dict()
-    dados["pago"] = not (dados["tipo"] == models.TipoMovimentacao.SAIDA and dados["fiado"])
+    dados["pago"] = not (dados["tipo"] == models.TipoMovimentacao.SAIDA and dados["pendente"])
     db_mov = models.Movimentacao(**dados)
     db.add(db_mov)
     db.commit()
@@ -142,7 +144,7 @@ def listar_movimentacoes(db: Session, usuario_id: int, produto_id: int | None = 
     return query.order_by(models.Movimentacao.data.desc()).all()
 
 
-def marcar_fiado_como_pago(
+def marcar_pendencia_como_paga(
     db: Session, movimentacao_id: int, usuario_id: int
 ) -> models.Movimentacao | None:
     mov = (
@@ -154,7 +156,7 @@ def marcar_fiado_como_pago(
         )
         .first()
     )
-    if not mov or not mov.fiado:
+    if not mov or not mov.pendente:
         return None
     mov.pago = True
     db.commit()
@@ -162,12 +164,12 @@ def marcar_fiado_como_pago(
     return mov
 
 
-def listar_fiados_pendentes(db: Session, usuario_id: int) -> list[schemas.FiadoPendente]:
+def listar_pendencias(db: Session, usuario_id: int) -> list[schemas.Pendencia]:
     pendentes = (
         db.query(models.Movimentacao)
         .join(models.Produto)
         .filter(
-            models.Movimentacao.fiado == True,  # noqa: E712
+            models.Movimentacao.pendente == True,  # noqa: E712
             models.Movimentacao.pago == False,  # noqa: E712
             models.Produto.usuario_id == usuario_id,
         )
@@ -179,7 +181,7 @@ def listar_fiados_pendentes(db: Session, usuario_id: int) -> list[schemas.FiadoP
         if not mov.cliente:
             continue
         resultado.append(
-            schemas.FiadoPendente(
+            schemas.Pendencia(
                 movimentacao_id=mov.id,
                 cliente_id=mov.cliente.id,
                 cliente_nome=mov.cliente.nome,
@@ -192,7 +194,7 @@ def listar_fiados_pendentes(db: Session, usuario_id: int) -> list[schemas.FiadoP
 
 
 def resumo_por_cliente(db: Session, usuario_id: int) -> list[schemas.ResumoCliente]:
-    pendentes = listar_fiados_pendentes(db, usuario_id)
+    pendentes = listar_pendencias(db, usuario_id)
     totais: dict[int, schemas.ResumoCliente] = {}
     for f in pendentes:
         if f.cliente_id not in totais:
@@ -226,7 +228,7 @@ def listar_compras_cliente(
             quantidade=c.quantidade,
             valor_unitario=c.valor_unitario,
             valor_total=round(c.quantidade * c.valor_unitario, 2),
-            fiado=c.fiado,
+            pendente=c.pendente,
             pago=c.pago,
             data=c.data,
         )
@@ -235,11 +237,20 @@ def listar_compras_cliente(
 
 
 # ---------- Cálculos de estoque e lucro ----------
-# Usa CUSTO MÉDIO: se o produto foi comprado por preços diferentes,
-# o custo considerado pra calcular lucro é a média ponderada das compras.
+# Usa CUSTO MÉDIO: se o produto foi comprado por preços diferentes, o custo
+# considerado pra calcular lucro é a média ponderada de todas as compras.
+
+
+def _e_do_mes_atual(data: datetime) -> bool:
+    agora = datetime.utcnow()
+    return data.year == agora.year and data.month == agora.month
+
 
 def calcular_resumo_produto(
-    db: Session, produto_id: int, usuario_id: int
+    db: Session,
+    produto_id: int,
+    usuario_id: int,
+    apenas_mes_atual: bool = False,
 ) -> schemas.ResumoProduto | None:
     produto = obter_produto(db, produto_id, usuario_id)
     if not produto:
@@ -247,23 +258,43 @@ def calcular_resumo_produto(
 
     movimentacoes = listar_movimentacoes(db, usuario_id, produto_id)
 
+    # Estoque e custo médio sempre olham pro histórico inteiro - não faria
+    # sentido "esquecer" uma compra de mês passado só porque a tela tá
+    # mostrando só o mês atual, senão o estoque e o custo ficariam errados.
     total_comprado = 0.0
     valor_total_compra = 0.0
-    total_vendido = 0.0
-    valor_total_venda = 0.0
+    total_vendido_historico = 0.0
 
     for mov in movimentacoes:
         if mov.tipo == models.TipoMovimentacao.ENTRADA:
             total_comprado += mov.quantidade
             valor_total_compra += mov.quantidade * mov.valor_unitario
         else:
-            total_vendido += mov.quantidade
-            valor_total_venda += mov.quantidade * mov.valor_unitario
+            total_vendido_historico += mov.quantidade
 
     custo_medio = valor_total_compra / total_comprado if total_comprado > 0 else 0.0
-    estoque_atual = total_comprado - total_vendido
-    custo_do_vendido = total_vendido * custo_medio
-    lucro = valor_total_venda - custo_do_vendido
+    estoque_atual = total_comprado - total_vendido_historico
+
+    # Já pra mostrar "quanto entrou/saiu" no resumo, aí sim filtra pelo
+    # período escolhido - é só isso que o botão "ver mês atual" controla.
+    movimentacoes_do_periodo = (
+        [m for m in movimentacoes if _e_do_mes_atual(m.data)]
+        if apenas_mes_atual
+        else movimentacoes
+    )
+
+    valor_investido_periodo = 0.0
+    total_vendido_periodo = 0.0
+    valor_vendido_periodo = 0.0
+    for mov in movimentacoes_do_periodo:
+        if mov.tipo == models.TipoMovimentacao.ENTRADA:
+            valor_investido_periodo += mov.quantidade * mov.valor_unitario
+        else:
+            total_vendido_periodo += mov.quantidade
+            valor_vendido_periodo += mov.quantidade * mov.valor_unitario
+
+    custo_do_vendido = total_vendido_periodo * custo_medio
+    lucro = valor_vendido_periodo - custo_do_vendido
 
     return schemas.ResumoProduto(
         produto_id=produto.id,
@@ -271,24 +302,29 @@ def calcular_resumo_produto(
         unidade=produto.unidade,
         estoque_atual=estoque_atual,
         custo_medio=round(custo_medio, 2),
-        total_investido=round(valor_total_compra, 2),
-        total_vendido_valor=round(valor_total_venda, 2),
+        total_investido=round(valor_investido_periodo, 2),
+        total_vendido_valor=round(valor_vendido_periodo, 2),
         lucro=round(lucro, 2),
     )
 
 
-def calcular_resumo_geral(db: Session, usuario_id: int) -> schemas.ResumoGeral:
+def calcular_resumo_geral(
+    db: Session, usuario_id: int, apenas_mes_atual: bool = False
+) -> schemas.ResumoGeral:
     produtos = listar_produtos(db, usuario_id)
     resumos = []
     for produto in produtos:
-        resumo = calcular_resumo_produto(db, produto.id, usuario_id)
+        resumo = calcular_resumo_produto(db, produto.id, usuario_id, apenas_mes_atual)
         if resumo:
             resumos.append(resumo)
 
     total_investido = round(sum(r.total_investido for r in resumos), 2)
     total_vendido = round(sum(r.total_vendido_valor for r in resumos), 2)
     lucro_total = round(sum(r.lucro for r in resumos), 2)
-    total_a_receber = round(sum(f.valor_total for f in listar_fiados_pendentes(db, usuario_id)), 2)
+    # dívida pendente é sempre o total real, não importa o período escolhido
+    # na tela - não faz sentido esconder que alguém deve só por ser de mês
+    # passado
+    total_a_receber = round(sum(p.valor_total for p in listar_pendencias(db, usuario_id)), 2)
 
     return schemas.ResumoGeral(
         produtos=resumos,

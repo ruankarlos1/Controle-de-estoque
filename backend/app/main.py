@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from . import models
 from .database import engine
-from .routers import auth, produtos, movimentacoes, relatorios, clientes, fiado
+from .routers import auth, produtos, movimentacoes, relatorios, clientes, pendentes
 
 # Cria as tabelas no banco (se ainda não existirem)
 models.Base.metadata.create_all(bind=engine)
@@ -28,7 +28,7 @@ app.include_router(clientes.router)
 app.include_router(produtos.router)
 app.include_router(movimentacoes.router)
 app.include_router(relatorios.router)
-app.include_router(fiado.router)
+app.include_router(pendentes.router)
 
 
 @app.get("/")

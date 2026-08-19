@@ -5,14 +5,14 @@ from .. import crud, schemas
 from ..database import get_db
 from .auth import obter_usuario_atual
 
-router = APIRouter(prefix="/fiado", tags=["fiado"])
+router = APIRouter(prefix="/pendentes", tags=["pendentes"])
 
 
-@router.get("/pendentes", response_model=list[schemas.FiadoPendente])
+@router.get("/", response_model=list[schemas.Pendencia])
 def listar_pendentes(
     db: Session = Depends(get_db), usuario: schemas.Usuario = Depends(obter_usuario_atual)
 ):
-    return crud.listar_fiados_pendentes(db, usuario.id)
+    return crud.listar_pendencias(db, usuario.id)
 
 
 @router.get("/por-cliente", response_model=list[schemas.ResumoCliente])
@@ -28,9 +28,10 @@ def marcar_como_pago(
     db: Session = Depends(get_db),
     usuario: schemas.Usuario = Depends(obter_usuario_atual),
 ):
-    mov = crud.marcar_fiado_como_pago(db, movimentacao_id, usuario.id)
+    mov = crud.marcar_pendencia_como_paga(db, movimentacao_id, usuario.id)
     if not mov:
         raise HTTPException(
-            status_code=404, detail="Fiado não encontrado ou já não é mais um fiado pendente"
+            status_code=404,
+            detail="Pendência não encontrada, ou ela já tinha sido paga",
         )
     return mov
